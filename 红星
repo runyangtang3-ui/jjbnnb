@@ -1,198 +1,429 @@
--- WindUI 官方加载逻辑（适配游戏/Studio双环境）
-local RunService = game:GetService("RunService")
-local cloneref = (cloneref or clonereference or function(instance) return instance end)
-local ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"))
-local HttpService = cloneref(game:GetService("HttpService"))
-local WindUI
-do
-	local ok, result = pcall(function()
-		return require("./src/Init")
-	end)
-	if ok then
-		WindUI = result
-	else
-		if cloneref(game:GetService("RunService")):IsStudio() then
-			WindUI = require(cloneref(ReplicatedStorage:WaitForChild("WindUI"):WaitForChild("Init")))
-		else
-			WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
-		end
-	end
-end
+--[[ v1.0.0 https://wearedevs.net/obfuscator ]] return(function(...)local D={"\074\055\088\061","\070\051\076\121\056\072\103\081";"\052\067\069\089\097\090\103\115\052\097\098\085\074\104\049\067\097\104\098\061","\114\107\105\107","\078\067\084\067\088\086\071\121\052\069\053\051\097\097\116\101\072\109\075\061","\097\085\086\122\053\109\069\048\102\087\061\061","\043\077\053\066\098\049\082\077\071\090\106\066\118\050\057\104";"\116\079\069\099\052\098\052\082\075\066\056\068\049\085\071\082\102\109\049\061","\082\056\057\068","\115\084\051\109\113\048\051\103\120\075\065\114","\090\112\106\121\089\106\085\053\103\049\103\061";"\049\066\081\082\088\085\073\054\102\085\107\048\075\087\061\061";"\108\109\089\056\114\105\056\065\074\084\061\061","\089\053\113\101\077\090\087\061","\049\117\081\069\088\050\116\069\086\085\069\099\052\109\055\117","\109\079\048\102\077\084\054\085";"\110\053\051\043\071\106\119\075";"\105\050\067\068\047\070\117\112\083\065\106\087\072\101\077\109\053\087\061\061";"\067\087\101\119\104\047\082\108\083\072\088\061";"\075\109\105\082\075\066\072\061","\075\086\105\110\078\069\053\069\070\097\056\088\049\110\116\120\070\103\115\061";"\106\052\080\054\103\120\105\098","\118\075\121\051\049\122\084\061";"\065\089\100\047";"\066\119\076\076\090\087\061\061";"\116\085\086\068\097\085\086\114\053\079\069\122\052\049\061\061","\088\108\068\065\076\098\090\082\103\043\098\106\055\108\108\074";"\089\074\102\103\117\056\073\055\109\081\098\073\080\115\075\061","\052\050\100\109\088\121\079\100\051\065\076\087\120\078\116\090\078\049\061\061";"\053\119\101\119";"\084\048\076\048","\054\103\097\098\077\051\086\071","\088\050\082\097\079\079\118\086\104\043\069\103\085\057\068\101\117\113\120\073\047\087\061\061","\088\114\068\053\090\081\088\069\057\089\052\088\072\122\068\061";"\074\105\086\120\049\117\089\110\090\098\056\071\053\090\055\067";"\055\075\049\108\100\054\113\112";"\056\074\081\075\066\089\079\090\070\119\069\052\101\072\088\061","\103\047\098\070\121\075\103\061";"\070\071\118\099\078\084\061\061","\086\109\055\066\052\085\107\069","\086\079\086\122\053\109\055\114\072\087\061\061";"\072\065\110\076";"\121\086\073\121\048\089\083\070\043\121\117\056\074\077\072\061";"\065\075\072\114\110\105\053\101\108\121\100\048\043\049\061\061","\075\073\105\115\051\084\106\070\066\086\085\080","\117\108\055\116\101\118\052\067\106\070\109\098\115\049\061\061","\077\067\055\047\113\101\073\119";"\079\110\104\101\117\084\061\061","\100\055\067\066\047\089\048\110\071\102\050\076\081\069\066\051\119\056\109\065";"\083\076\088\061";"\074\079\088\061","\117\079\078\076\074\047\061\061";"\089\105\113\109\074\066\108\056\083\076\051\087\089\047\061\061","\047\057\065\061","\104\115\077\051\105\084\107\050\053\057\065\061";"\075\079\086\107\053\090\069\114\052\049\061\061";"\085\090\104\085\084\108\079\099\103\090\122\109","\105\112\117\104\085\087\061\061";"\119\089\069\117\114\071\081\084\077\080\120\052";"\053\118\079\079\119\118\108\056\050\088\108\061","\073\118\076\113","\079\090\075\065\075\067\106\107\107\047\108\061","\070\071\056\090";"\097\106\053\043\075\117\056\098\097\054\056\082\072\068\073\100\119\047\061\061","\078\117\052\057\088\068\088\115\056\097\083\117\097\122\121\076\070\049\061\061";"\083\065\072\087\098\099\098\057","\069\098\104\077\101\081\077\100\049\089\084\061";"\121\066\068\073\057\065\079\098\052\057\105\068\110\049\061\061";"\075\105\068\109","\108\050\080\054\118\054\098\080\115\100\065\112";"\074\065\097\102\073\084\110\118\082\106\114\066\051\065\083\087\088\049\061\061";"\081\048\055\102\118\072\047\079\117\051\105\087\089\083\090\108\057\043\083\114\074\084\061\061","\081\088\067\107\109\109\103\074\116\089\049\061";"\119\050\056\106\053\104\086\103\078\090\083\061";"\098\119\122\088\081\075\117\097\073\049\083\061","\053\085\055\114\078\117\056\047\088\090\056\069","\071\083\073\070\098\106\048\079";"\108\090\071\053\097\118\111\048\082\080\084\061","\086\085\055\114\102\109\116\097\102\067\052\082\052\050\053\047\102\117\081\068\097\109\055\082\102\066\049\061","\048\050\083\074\118\101\057\076\078\115\089\061";"\070\056\047\117";"\116\079\069\099\052\098\052\082\075\066\056\068\049\085\071\082\102\109\116\101\052\103\056\108\088\050\056\110","\087\090\068\080\106\080\110\072\090\084\061\061";"\097\103\116\076\097\067\071\112\056\079\052\069\116\103\052\100\056\103\108\061";"\090\051\066\052\086\073\110\100\048\079\121\104\115\120\066\114\090\084\061\061";"\122\098\121\056\103\088\052\087\076\106\098\084";"\108\110\108\085\066\076\120\067","\083\116\098\116\055\122\051\110\082\105\083\061","\097\109\105\067\075\085\097\061","\088\085\107\048\102\079\086\114\052\090\088\061","\050\102\104\113\081\070\112\112\047\078\109\099\108\055\111\119\090\043\084\067\120\121\098\080\097\067\086\101\111\069\051\119","\118\073\101\076\050\117\120\043\099\085\110\050\116\081\068\111\101\103\067\048\101\084\061\061","\079\103\077\122\106\051\099\099";"\086\086\111\088\118\056\113\114\065\114\115\061","\079\118\083\061";"\050\067\055\082\102\079\116\069\070\084\061\061","\075\118\050\122","\116\113\098\075\097\117\073\068\081\055\052\088";"\075\057\055\075\087\104\115\116\067\104\090\101\118\112\048\070\071\074\107\107\122\067\073\119\054\070\073\050\079\084\119\070\057\066\102\047\080\068\081\049\098\107\119\121\078\080\119\115\078\102\101\098\082\072\054\098\047\077\078\043\070\107\073\077\108\069\082\054\103\090\068\047\116\066\054\088\077\116\065\118\098\100\076\071\117\049\111\069\118\079\113\071\081\087\061\061","\049\085\071\071\102\079\053\069\097\117\116\071\053\109\097\061";"\070\105\105\121\102\090\097\067\072\106\116\121\056\086\082\071\106\047\061\061";"\076\053\113\057\088\084\061\061","\110\054\112\080\111\071\098\068\100\105\047\061";"\073\118\071\073\084\109\048\050\115\048\109\082\082\079\057\070";"\107\048\111\084\122\079\107\054";"\116\085\086\068\116\109\086\110\088\085\086\099\052\109\105\099\053\104\072\061","\097\109\122\072\090\118\070\084\100\109\080\068\087\101\057\086\054\115\089\069\065\084\061\061";"\119\104\116\068\075\098\053\069\053\084\061\061";"\086\097\116\082\102\049\061\061","\048\068\080\085\082\047\061\061";"\072\085\122\110\119\065\078\098\107\081\047\104\055\087\061\061";"\054\048\086\113\080\083\114\110\073\087\071\108\048\057\116\106\076\077\104\107\108\077\047\049\052\054\088\061","\052\067\051\077","\074\081\054\083\106\074\088\120\088\084\084\061";"\114\119\054\051\104\116\088\113";"\108\103\049\056\067\117\050\055\049\077\067\113\117\065\089\066\122\087\061\061";"\050\077\048\073\079\052\056\069\086\111\083\097\116\108\110\116\110\119\077\103\050\071\120\118\047\116\075\122\043\048\122\065\120\077\048\088\057\107\072\051\043\082\069\079\077\066\075\056\071\082\082\106\088\085\067\065\087\050\100\079\101\057\112\073\105\049\061\061","\098\049\061\061","\116\102\050\072\099\088\104\100\043\071\103\110\109\083\119\065\073\118\101\076\055\120\089\061";"\048\050\097\079\071\052\090\111\078\
 
--- ====================== 红星完整功能逻辑（原封不动保留） ======================
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local SoundService = game:GetService("SoundService")
-local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
-print("[红星脚本中心 WindUI整合版] 加载完成")
 
--- 全局状态
-local State = {
-    Flying = false,
-    NoClip = false,
-    InfJump = false,
-    Speed = 16,
-    Aimbot = false,
-    AimbotVisible = false,
-    Hitbox = false,
-    HitboxSize = 5,
-}
-local Components = {
-    FlyBodyVelocity = nil,
-    FlyConnection = nil,
-    NoClipConnection = nil,
-    JumpConnection = nil,
-    AimbotConnection = nil,
-    HitboxConnection = nil,
-    HitboxParts = {},
-}
-local char, root, hum
-local currentSound = nil
-local isPaused = false
 
--- 角色初始化
-local function SetupCharacter()
-    char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    root = char:WaitForChild("HumanoidRootPart")
-    hum = char:WaitForChild("Humanoid")
-    if State.NoClip then
-        for _, p in pairs(char:GetDescendants()) do
-            if p:IsA("BasePart") then p.CanCollide = false end
-        end
-    end
-end
-SetupCharacter()
-LocalPlayer.CharacterAdded:Connect(function()
-    SetupCharacter()
-    task.wait(0.1)
-    if State.NoClip then
-        for _, p in pairs(char:GetDescendants()) do
-            if p:IsA("BasePart") then p.CanCollide = false end
-        end
-    end
-end)
 
--- 飞行
-local function StartFlying()
-    if not root or State.Flying then return end
-    State.Flying = true
-    hum.PlatformStand = true
-    local bv = Instance.new("BodyVelocity")
-    bv.Velocity = Vector3.new(0,0,0)
-    bv.MaxForce = Vector3.new(1e5,1e5,1e5)
-    bv.Parent = root
-    local bg = Instance.new("BodyGyro")
-    bg.MaxTorque = Vector3.new(1e5,1e5,1e5)
-    bg.CFrame = Camera.CFrame
-    bg.Parent = root
-    Components.FlyBodyVelocity = bv
-    Components.FlyConnection = RunService.RenderStepped:Connect(function()
-        if not root or hum.Health <= 0 then return end
-        local moveDir = Vector3.zero
-        if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir += Camera.CFrame.LookVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir -= Camera.CFrame.LookVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir -= Camera.CFrame.RightVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir += Camera.CFrame.RightVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir += Vector3.new(0,1,0) end
-        if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir -= Vector3.new(0,1,0) end
-        if bv then bv.Velocity = moveDir.Magnitude>0 and moveDir.Unit*50 or Vector3.zero end
-        if bg then bg.CFrame = Camera.CFrame end
-    end)
-end
-local function StopFlying()
-    State.Flying = false
-    if hum then hum.PlatformStand = false end
-    if Components.FlyBodyVelocity then Components.FlyBodyVelocity:Destroy() end
-    if Components.FlyConnection then Components.FlyConnection:Disconnect() end
-    if root and root:FindFirstChildOfClass("BodyGyro") then root:FindFirstChildOfClass("BodyGyro"):Destroy() end
-end
 
--- 穿墙
-local function ToggleNoClip()
-    State.NoClip = not State.NoClip
-    if State.NoClip then
-        Components.NoClipConnection = RunService.Stepped:Connect(function()
-            if not char then return end
-            for _,p in pairs(char:GetDescendants()) do
-                if p:IsA("BasePart") then p.CanCollide = false end
-            end
-        end)
-    else
-        if Components.NoClipConnection then Components.NoClipConnection:Disconnect() end
-        if not char then return end
-        for _,p in pairs(char:GetDescendants()) do
-            if p:IsA("BasePart") then p.CanCollide = true end
-        end
-    end
-end
 
--- 无限跳
-local function ToggleInfJump()
-    State.InfJump = not State.InfJump
-    if State.InfJump then
-        Components.JumpConnection = UserInputService.JumpRequest:Connect(function()
-            if hum and hum.Health>0 then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
-        end)
-    else
-        if Components.JumpConnection then Components.JumpConnection:Disconnect() end
-    end
-end
 
--- 速度设置
-local function SetSpeed(value)
-    State.Speed = value
-    if hum then hum.WalkSpeed = value end
-end
 
--- 获取最近敌人
-local function GetNearestTarget(visibleOnly)
-    local nearest, nearestDist = nil, math.huge
-    for _,player in pairs(Players:GetPlayers()) do
-        if player == LocalPlayer then continue end
-        local c = player.Character
-        if not c then continue end
-        local tr = c:FindFirstChild("HumanoidRootPart")
-        local th = c:FindFirstChild("Humanoid")
-        if not tr or not th or th.Health <=0 then continue end
-        local _,onScreen = Camera:WorldToViewportPoint(tr.Position)
-        if visibleOnly and not onScreen then continue end
-        local dist = (root.Position - tr.Position).Magnitude
-        if dist < nearestDist then
-            nearestDist = dist
-            nearest = player
-        end
-    end
-    return nearest
-end
 
--- 自瞄
-local function StartAimbot()
-    Components.AimbotConnection = RunService.RenderStepped:Connect(function()
-        if not State.Aimbot or not root then return end
-        local target = GetNearestTarget(State.AimbotVisible)
-        if not target or not target.Character then return end
-        local tr = target.Character:FindFirstChild("HumanoidRootPart")
-        if tr then
-            Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, tr.Position), 0.3)
-        end
-    end)
-end
-local function StopAimbot()
-    if Components.AimbotConnection then Components.AimbotConnection:Disconnect() end
-end
 
--- Hitbox
-local function CreateHitboxParts()
-    for _,v in pairs(Components.HitboxParts) do v:Destroy() end
-    Components.HitboxParts = {}
-end
-local function ToggleHitbox()
-    State.Hitbox = not State.Hitbox
-    if State.Hitbox then
-        Components.HitboxConnection = RunService.Heartbeat:Connect(function()
-            for _,player in pairs(Players:GetPlayers()) do
-                if player == LocalPlayer then continue end
-                local c = player.Character
-                if not c the
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
