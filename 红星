@@ -1,0 +1,198 @@
+-- WindUI 官方加载逻辑（适配游戏/Studio双环境）
+local RunService = game:GetService("RunService")
+local cloneref = (cloneref or clonereference or function(instance) return instance end)
+local ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"))
+local HttpService = cloneref(game:GetService("HttpService"))
+local WindUI
+do
+	local ok, result = pcall(function()
+		return require("./src/Init")
+	end)
+	if ok then
+		WindUI = result
+	else
+		if cloneref(game:GetService("RunService")):IsStudio() then
+			WindUI = require(cloneref(ReplicatedStorage:WaitForChild("WindUI"):WaitForChild("Init")))
+		else
+			WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
+		end
+	end
+end
+
+-- ====================== 红星完整功能逻辑（原封不动保留） ======================
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local SoundService = game:GetService("SoundService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+print("[红星脚本中心 WindUI整合版] 加载完成")
+
+-- 全局状态
+local State = {
+    Flying = false,
+    NoClip = false,
+    InfJump = false,
+    Speed = 16,
+    Aimbot = false,
+    AimbotVisible = false,
+    Hitbox = false,
+    HitboxSize = 5,
+}
+local Components = {
+    FlyBodyVelocity = nil,
+    FlyConnection = nil,
+    NoClipConnection = nil,
+    JumpConnection = nil,
+    AimbotConnection = nil,
+    HitboxConnection = nil,
+    HitboxParts = {},
+}
+local char, root, hum
+local currentSound = nil
+local isPaused = false
+
+-- 角色初始化
+local function SetupCharacter()
+    char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    root = char:WaitForChild("HumanoidRootPart")
+    hum = char:WaitForChild("Humanoid")
+    if State.NoClip then
+        for _, p in pairs(char:GetDescendants()) do
+            if p:IsA("BasePart") then p.CanCollide = false end
+        end
+    end
+end
+SetupCharacter()
+LocalPlayer.CharacterAdded:Connect(function()
+    SetupCharacter()
+    task.wait(0.1)
+    if State.NoClip then
+        for _, p in pairs(char:GetDescendants()) do
+            if p:IsA("BasePart") then p.CanCollide = false end
+        end
+    end
+end)
+
+-- 飞行
+local function StartFlying()
+    if not root or State.Flying then return end
+    State.Flying = true
+    hum.PlatformStand = true
+    local bv = Instance.new("BodyVelocity")
+    bv.Velocity = Vector3.new(0,0,0)
+    bv.MaxForce = Vector3.new(1e5,1e5,1e5)
+    bv.Parent = root
+    local bg = Instance.new("BodyGyro")
+    bg.MaxTorque = Vector3.new(1e5,1e5,1e5)
+    bg.CFrame = Camera.CFrame
+    bg.Parent = root
+    Components.FlyBodyVelocity = bv
+    Components.FlyConnection = RunService.RenderStepped:Connect(function()
+        if not root or hum.Health <= 0 then return end
+        local moveDir = Vector3.zero
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir += Camera.CFrame.LookVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir -= Camera.CFrame.LookVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir -= Camera.CFrame.RightVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir += Camera.CFrame.RightVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir += Vector3.new(0,1,0) end
+        if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir -= Vector3.new(0,1,0) end
+        if bv then bv.Velocity = moveDir.Magnitude>0 and moveDir.Unit*50 or Vector3.zero end
+        if bg then bg.CFrame = Camera.CFrame end
+    end)
+end
+local function StopFlying()
+    State.Flying = false
+    if hum then hum.PlatformStand = false end
+    if Components.FlyBodyVelocity then Components.FlyBodyVelocity:Destroy() end
+    if Components.FlyConnection then Components.FlyConnection:Disconnect() end
+    if root and root:FindFirstChildOfClass("BodyGyro") then root:FindFirstChildOfClass("BodyGyro"):Destroy() end
+end
+
+-- 穿墙
+local function ToggleNoClip()
+    State.NoClip = not State.NoClip
+    if State.NoClip then
+        Components.NoClipConnection = RunService.Stepped:Connect(function()
+            if not char then return end
+            for _,p in pairs(char:GetDescendants()) do
+                if p:IsA("BasePart") then p.CanCollide = false end
+            end
+        end)
+    else
+        if Components.NoClipConnection then Components.NoClipConnection:Disconnect() end
+        if not char then return end
+        for _,p in pairs(char:GetDescendants()) do
+            if p:IsA("BasePart") then p.CanCollide = true end
+        end
+    end
+end
+
+-- 无限跳
+local function ToggleInfJump()
+    State.InfJump = not State.InfJump
+    if State.InfJump then
+        Components.JumpConnection = UserInputService.JumpRequest:Connect(function()
+            if hum and hum.Health>0 then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+        end)
+    else
+        if Components.JumpConnection then Components.JumpConnection:Disconnect() end
+    end
+end
+
+-- 速度设置
+local function SetSpeed(value)
+    State.Speed = value
+    if hum then hum.WalkSpeed = value end
+end
+
+-- 获取最近敌人
+local function GetNearestTarget(visibleOnly)
+    local nearest, nearestDist = nil, math.huge
+    for _,player in pairs(Players:GetPlayers()) do
+        if player == LocalPlayer then continue end
+        local c = player.Character
+        if not c then continue end
+        local tr = c:FindFirstChild("HumanoidRootPart")
+        local th = c:FindFirstChild("Humanoid")
+        if not tr or not th or th.Health <=0 then continue end
+        local _,onScreen = Camera:WorldToViewportPoint(tr.Position)
+        if visibleOnly and not onScreen then continue end
+        local dist = (root.Position - tr.Position).Magnitude
+        if dist < nearestDist then
+            nearestDist = dist
+            nearest = player
+        end
+    end
+    return nearest
+end
+
+-- 自瞄
+local function StartAimbot()
+    Components.AimbotConnection = RunService.RenderStepped:Connect(function()
+        if not State.Aimbot or not root then return end
+        local target = GetNearestTarget(State.AimbotVisible)
+        if not target or not target.Character then return end
+        local tr = target.Character:FindFirstChild("HumanoidRootPart")
+        if tr then
+            Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, tr.Position), 0.3)
+        end
+    end)
+end
+local function StopAimbot()
+    if Components.AimbotConnection then Components.AimbotConnection:Disconnect() end
+end
+
+-- Hitbox
+local function CreateHitboxParts()
+    for _,v in pairs(Components.HitboxParts) do v:Destroy() end
+    Components.HitboxParts = {}
+end
+local function ToggleHitbox()
+    State.Hitbox = not State.Hitbox
+    if State.Hitbox then
+        Components.HitboxConnection = RunService.Heartbeat:Connect(function()
+            for _,player in pairs(Players:GetPlayers()) do
+                if player == LocalPlayer then continue end
+                local c = player.Character
+                if not c the
